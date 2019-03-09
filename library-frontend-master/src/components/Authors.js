@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
+import Select from 'react-select'
 
 const Authors = (props) => {
   const [name, setName] = useState('')
   const [born, setBorn] = useState('')
+  const [selectedOption, setSelectedOption] = useState('')
 
   if (!props.show) {
     return null
@@ -16,6 +18,13 @@ const Authors = (props) => {
   }
 
   const authors = data.allAuthors
+  const options = authors.map(a => ({ value: a.name, label: a.name }))
+
+  const handleChange = (target) => {
+    setName(target.value)
+    setSelectedOption(target)
+    console.log('option selected:', target.value)
+  }
 
 
   const submit = async (e) => {
@@ -58,11 +67,13 @@ const Authors = (props) => {
         <form onSubmit={submit}>
           <div>
             name
-          <input
-              value={name}
-              onChange={({ target }) => setName(target.value)}
+            <Select
+              value={selectedOption}
+              onChange={handleChange}
+              options={options}
             />
           </div>
+
           <div>
             born
           <input
