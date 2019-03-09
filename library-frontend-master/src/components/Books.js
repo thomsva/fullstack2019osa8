@@ -23,6 +23,7 @@ const Books = (props) => {
           <tr>
             <th></th>
             <th>
+
               author
             </th>
             <th>
