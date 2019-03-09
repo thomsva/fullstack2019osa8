@@ -6,47 +6,67 @@ import { useQuery, useMutation } from 'react-apollo-hooks'
 import { gql } from 'apollo-boost'
 
 const ALL_AUTHORS = gql`
-{
-  allAuthors {
-    name
-    born
-    bookCount
+  {
+    allAuthors {
+      name
+      born
+      bookCount
+    }
   }
-}
 `
 const ALL_BOOKS = gql`
-{
-  allBooks {
-    title
-    author
-    published
+  {
+    allBooks {
+      title
+      author
+      published
+    }
   }
-}
 `
 const CREATE_BOOK = gql`
-mutation createBook($title: String!, $author: String!, $published: Int!, $genres: [String]!){
-  addBook(
-    title: $title
-    author: $author
-    published: $published
-    genres: $genres
-  ){
-    title
-    author
-    published
-    genres
+  mutation createBook($title: String!, $author: String!, $published: Int!, $genres: [String]!){
+    addBook(
+      title: $title
+      author: $author
+      published: $published
+      genres: $genres
+    ){
+      title
+      author
+      published
+      genres
+    }
   }
-}
 `
+
+const EDIT_AUTHOR_BORN = gql`
+  mutation editAuthor($name: String!, $setBornTo: Int!){
+    editAuthor( name: $name, setBornTo: $setBornTo){
+        name
+        born
+        bookCount
+        id
+    }
+  }
+`
+
+
+
 const handleError = (e) => console.log('error', e)
 
 const App = () => {
   const [page, setPage] = useState('authors')
   const resultAuthors = useQuery(ALL_AUTHORS)
   const resultBooks = useQuery(ALL_BOOKS)
+
   const addBook = useMutation(CREATE_BOOK, {
     onError: handleError,
     refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
+  })
+
+  const editAuthor = useMutation(EDIT_AUTHOR_BORN, {
+    onError: handleError,
+    refetchQueries: [{ query: ALL_AUTHORS }]
   })
 
 
@@ -62,6 +82,7 @@ const App = () => {
       <Authors
         show={page === 'authors'}
         result={resultAuthors}
+        editAuthor={editAuthor}
       />
 
       <Books
