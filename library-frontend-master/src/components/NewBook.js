@@ -15,7 +15,12 @@ const NewBook = (props) => {
     e.preventDefault()
     console.log('add book...', e)
 
-    props.addBook({ variables: { title, author, published: parseInt(published), genres } })
+    try {
+      await props.addBook({ variables: { title, author, published: parseInt(published), genres } })
+    } catch (e) {
+      console.log(e)
+      props.handleError(e.graphQLErrors[0].message)
+    }
 
     setTitle('')
     setPublished('')

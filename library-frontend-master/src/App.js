@@ -51,12 +51,20 @@ const EDIT_AUTHOR_BORN = gql`
 
 
 
-const handleError = (e) => console.log('error', e)
+
 
 const App = () => {
   const [page, setPage] = useState('authors')
   const resultAuthors = useQuery(ALL_AUTHORS)
   const resultBooks = useQuery(ALL_BOOKS)
+  const [errorMessage, setErrorMessage] = useState(null)
+
+  const handleError = (message) => {
+    setErrorMessage(message)
+    setTimeout(() => {
+      setErrorMessage(null)
+    }, 2000)
+  }
 
   const addBook = useMutation(CREATE_BOOK, {
     onError: handleError,
@@ -77,11 +85,13 @@ const App = () => {
         <button onClick={() => setPage('add')}>add book</button>
       </div>
 
+      <div>{errorMessage}</div>
 
       <Authors
         show={page === 'authors'}
         result={resultAuthors}
         editAuthor={editAuthor}
+        handleError={handleError}
       />
 
       <Books
@@ -92,6 +102,7 @@ const App = () => {
       <NewBook
         show={page === 'add'}
         addBook={addBook}
+        handleError={handleError}
       />
 
     </div>

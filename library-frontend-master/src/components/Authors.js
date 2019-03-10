@@ -26,15 +26,19 @@ const Authors = (props) => {
     console.log('option selected:', target.value)
   }
 
-
   const submit = async (e) => {
     e.preventDefault()
     console.log('update born year...', e)
-
-    props.editAuthor({ variables: { name, setBornTo: parseInt(born) } })
+    try {
+      await props.editAuthor({ variables: { name, setBornTo: parseInt(born) } })
+    } catch (e) {
+      console.log(e)
+      props.handleError(e.graphQLErrors[0].message)
+    }
 
     setName('')
     setBorn('')
+    setSelectedOption('')
 
   }
 
