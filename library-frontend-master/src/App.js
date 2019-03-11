@@ -22,43 +22,56 @@ const ALL_BOOKS = gql`
       title
       author{name}
       published
-    }
-  }
-`
-const CREATE_BOOK = gql`
-  mutation createBook($title: String!, $author: String!, $published: Int!, $genres: [String]!){
-    addBook(
-      title: $title
-      author: $author
-      published: $published
-      genres: $genres
-    ){
-      title
-      published
       genres
     }
   }
 `
-
-const EDIT_AUTHOR_BORN = gql`
-  mutation editAuthor($name: String!, $setBornTo: Int!){
-    editAuthor( name: $name, setBornTo: $setBornTo){
-        name
-        born
-        bookCount
-        id
+const FIND_BOOKS_BY_GENRE = gql`
+  
+  query findBooksByGenre($genre: String){
+    allBooks (genre: $genre){
+      title
+      author{name}
+      published
+      genres
     }
   }
+  
+`
+
+const CREATE_BOOK = gql`
+mutation createBook($title: String!, $author: String!, $published: Int!, $genres: [String]!){
+  addBook(
+    title: $title
+      author: $author
+      published: $published
+      genres: $genres
+  ){
+    title
+    published
+    genres
+  }
+}
+`
+
+const EDIT_AUTHOR_BORN = gql`
+mutation editAuthor($name: String!, $setBornTo: Int!){
+  editAuthor(name: $name, setBornTo: $setBornTo){
+    name
+    born
+    bookCount
+    id
+  }
+}
 `
 
 const LOGIN = gql`
-  mutation login($username: String!, $password: String!) {
-    login(username: $username, password: $password)  {
-      value
-    }
+mutation login($username: String!, $password: String!) {
+  login(username: $username, password: $password)  {
+    value
   }
+}
 `
-
 
 
 const App = () => {
@@ -67,6 +80,8 @@ const App = () => {
   const resultBooks = useQuery(ALL_BOOKS)
   const [errorMessage, setErrorMessage] = useState(null)
   const [token, setToken] = useState(null)
+  const [selectedGenre, setSelectedGenre] = useState(null)
+  const booksByGenre = useQuery(FIND_BOOKS_BY_GENRE, { genre: "" })
 
   const client = useApolloClient()
 
@@ -101,20 +116,6 @@ const App = () => {
     setPage('authors')
   }
 
-
-  /*
-        <div>
-          {errorMessage}
-          <h2>Login</h2>
-          <LoginForm
-            login={login}
-            setToken={(token) => setToken(token)}
-            handleError={handleError}
-          />
-        </div>
-      )
-  */
-
   return (
     <div>
 
@@ -138,6 +139,10 @@ const App = () => {
       <Books
         show={page === 'books'}
         result={resultBooks}
+        selectedGenre={selectedGenre}
+        setSelectedGenre={setSelectedGenre}
+        client={client}
+        booksByGenre={booksByGenre}
       />
 
       <NewBook
@@ -153,7 +158,6 @@ const App = () => {
         handleError={handleError}
         setPage={setPage}
       />
-
 
     </div>
   )

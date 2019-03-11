@@ -76,7 +76,8 @@ const resolvers = {
     allAuthors: () => Author.find({}),
     allBooks: async (root, args) => {
       const allBooks = await Book.find({}).populate('author')
-      return (
+      console.log('allBooks', args)
+      const result =
         (args.author === undefined)
           ? (args.genre === undefined)
             ? allBooks
@@ -85,7 +86,8 @@ const resolvers = {
             ? allBooks.filter(b => b.author.name === args.author)
             : allBooks.filter(b => (b.author.name === args.author
               && b.genres.includes(args.genre)))
-      )
+      console.log('returning books', result.length)
+      return result
     },
     me: (root, args, context) => {
       return context.currentUser
@@ -168,7 +170,6 @@ const resolvers = {
         username: user.username,
         id: user._id,
       }
-
       return { value: jwt.sign(userForToken, JWT_SECRET) }
     }
   }
@@ -179,7 +180,6 @@ const server = new ApolloServer({
   resolvers,
   context: async ({ req }) => {
     const auth = req ? req.headers.authorization : null
-    console.log('auth', auth)
     if (auth && auth.toLowerCase().startsWith('bearer ')) {
       const decodedToken = jwt.verify(
         auth.substring(7), JWT_SECRET

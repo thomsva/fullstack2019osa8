@@ -1,6 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
+
+
+
 
 const Books = (props) => {
+
+
   if (!props.show) {
     return null
   }
@@ -12,11 +17,29 @@ const Books = (props) => {
     return <div>error</div>
   }
 
-  const books = data.allBooks
+  const [books, setBooks] = useState(data.allBooks)
+
+
+  //console.log(books)
+  const genres = [...new Set(data.allBooks.reduce((result, b) => result = [...result, ...b.genres], []))]
+
+  const handleGenreChange = async (g) => {
+    console.log('click genre: ', g)
+    if (g === '') {
+      setBooks(data.allBooks)
+    } else {
+      const newBooks = await props.booksByGenre.refetch({ genre: g })
+      setBooks(newBooks.data.allBooks)
+    }
+    props.setSelectedGenre(g)
+
+  }
 
   return (
     <div>
       <h2>books</h2>
+
+      <h3>showing books of the genre: {props.selectedGenre ? props.selectedGenre : 'any genre'}</h3>
 
       <table>
         <tbody>
@@ -39,6 +62,10 @@ const Books = (props) => {
           )}
         </tbody>
       </table>
+
+      {genres.map(g => <button key={g + '_button'} onClick={() => handleGenreChange(g)}>{g}</button>)}
+
+      <button key='any_genres_button' onClick={() => handleGenreChange('')}>Any genre</button>
     </div>
   )
 }
