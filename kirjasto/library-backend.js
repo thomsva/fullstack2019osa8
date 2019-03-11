@@ -70,7 +70,7 @@ const typeDefs = gql`
     ):Token
   }
   type Subscription {
-    bookAdded: Book!
+    bookAdded: Book
   }    
 
 `
@@ -185,7 +185,7 @@ const resolvers = {
   Subscription: {
     bookAdded: {
       subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
-    },
+    }
   }
 }
 

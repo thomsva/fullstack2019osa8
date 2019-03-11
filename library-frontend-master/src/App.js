@@ -4,9 +4,10 @@ import Books from './components/Books'
 import Recommended from './components/Recommended'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
-import { useQuery, useMutation } from 'react-apollo-hooks'
+import { useQuery, useMutation, useSubscription } from 'react-apollo-hooks'
 import { gql } from 'apollo-boost'
 import { useApolloClient } from 'react-apollo-hooks'
+import { Subscription } from 'react-apollo'
 
 const ALL_AUTHORS = gql`
   {
@@ -71,10 +72,15 @@ mutation login($username: String!, $password: String!) {
   }
 }
 `
-
 const ME = gql`
-  
   {  me{favoriteGenre}}
+`
+
+const BOOK_ADDED = gql`
+  subscription{ 
+    bookAdded
+      {title}
+  }
   
 `
 
@@ -88,10 +94,19 @@ const App = () => {
   const [token, setToken] = useState(null)
   const [selectedGenre, setSelectedGenre] = useState(null)
   const booksByGenre = useQuery(FIND_BOOKS_BY_GENRE, { genre: "" })
-
-
-
   const client = useApolloClient()
+
+  const BookAdded = () => {
+    const { data, error, loading } = useSubscription(
+      BOOK_ADDED
+    )
+
+    if (loading) return <div>Waiting for new books...</div>
+    if (error) return <div>Error! {error.message}`</div>
+    console.log('Subscribed data', data)
+    return <div>Recently added book: {data.bookAdded.title}</div>
+  }
+
 
   useEffect(() => {
     setToken(localStorage.getItem('library-user-token', token))
@@ -137,6 +152,15 @@ const App = () => {
       </div>
 
       <div>{errorMessage}</div>
+      <BookAdded />
+      <Subscription
+        subscription={BOOK_ADDED}
+        onSubscriptionData={({ subscriptionData }) => {
+          console.log('subscribed', subscriptionData)
+        }}
+      >
+        {() => null}
+      </Subscription>
 
 
       <Authors
