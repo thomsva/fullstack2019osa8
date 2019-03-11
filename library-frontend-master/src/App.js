@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Authors from './components/Authors'
 import Books from './components/Books'
+import Recommended from './components/Recommended'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 import { useQuery, useMutation } from 'react-apollo-hooks'
@@ -27,7 +28,6 @@ const ALL_BOOKS = gql`
   }
 `
 const FIND_BOOKS_BY_GENRE = gql`
-  
   query findBooksByGenre($genre: String){
     allBooks (genre: $genre){
       title
@@ -36,7 +36,6 @@ const FIND_BOOKS_BY_GENRE = gql`
       genres
     }
   }
-  
 `
 
 const CREATE_BOOK = gql`
@@ -73,15 +72,24 @@ mutation login($username: String!, $password: String!) {
 }
 `
 
+const ME = gql`
+  
+  {  me{favoriteGenre}}
+  
+`
+
 
 const App = () => {
   const [page, setPage] = useState('authors')
   const resultAuthors = useQuery(ALL_AUTHORS)
   const resultBooks = useQuery(ALL_BOOKS)
+  const resultMe = useQuery(ME)
   const [errorMessage, setErrorMessage] = useState(null)
   const [token, setToken] = useState(null)
   const [selectedGenre, setSelectedGenre] = useState(null)
   const booksByGenre = useQuery(FIND_BOOKS_BY_GENRE, { genre: "" })
+
+
 
   const client = useApolloClient()
 
@@ -122,12 +130,14 @@ const App = () => {
       <div>
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
+        <button onClick={() => setPage('recommended')}>recommended</button>
         {token && <button onClick={() => setPage('add')}>add book</button>}
         {!token && <button onClick={() => setPage('login')}>login</button>}
         {token && <button onClick={logout}>logout</button>}
       </div>
 
       <div>{errorMessage}</div>
+
 
       <Authors
         show={page === 'authors'}
@@ -141,8 +151,17 @@ const App = () => {
         result={resultBooks}
         selectedGenre={selectedGenre}
         setSelectedGenre={setSelectedGenre}
-        client={client}
         booksByGenre={booksByGenre}
+        resultMe={resultMe}
+      />
+
+      <Recommended
+        show={page === 'recommended'}
+        result={resultBooks}
+        selectedGenre={selectedGenre}
+        setSelectedGenre={setSelectedGenre}
+        booksByGenre={booksByGenre}
+        resultMe={resultMe}
       />
 
       <NewBook
