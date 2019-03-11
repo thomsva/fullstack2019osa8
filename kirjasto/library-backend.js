@@ -154,6 +154,7 @@ const resolvers = {
     },
     createUser: (root, args) => {
       const user = new User({ username: args.username, favoriteGenre: args.favoriteGenre })
+      console.log(args)
       return user.save()
         .catch(error => {
           throw new UserInputError(error.message, {
@@ -161,6 +162,7 @@ const resolvers = {
           })
         })
     },
+
     login: async (root, args) => {
       const user = await User.findOne({ username: args.username })
       if (!user || args.password !== 'secred') {
