@@ -164,7 +164,6 @@ const resolvers = {
       if (!user || args.password !== 'secred') {
         throw new UserInputError("wrong credentials")
       }
-
       const userForToken = {
         username: user.username,
         id: user._id,
@@ -189,7 +188,6 @@ const server = new ApolloServer({
       return { currentUser }
     }
   }
-
 })
 
 

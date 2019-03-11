@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
+import LoginForm from './components/LoginForm'
 import { useQuery, useMutation } from 'react-apollo-hooks'
 import { gql } from 'apollo-boost'
+import { useApolloClient } from 'react-apollo-hooks'
 
 const ALL_AUTHORS = gql`
   {
@@ -49,7 +51,13 @@ const EDIT_AUTHOR_BORN = gql`
   }
 `
 
-
+const LOGIN = gql`
+  mutation login($username: String!, $password: String!) {
+    login(username: $username, password: $password)  {
+      value
+    }
+  }
+`
 
 
 
@@ -58,6 +66,14 @@ const App = () => {
   const resultAuthors = useQuery(ALL_AUTHORS)
   const resultBooks = useQuery(ALL_BOOKS)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [token, setToken] = useState(null)
+
+  const client = useApolloClient()
+
+  useEffect(() => {
+    setToken(localStorage.getItem('library-user-token', token))
+  }, [])
+
 
   const handleError = (message) => {
     setErrorMessage(message)
@@ -76,13 +92,38 @@ const App = () => {
     refetchQueries: [{ query: ALL_AUTHORS }]
   })
 
+  const login = useMutation(LOGIN)
+
+  const logout = () => {
+    setToken(null)
+    localStorage.clear()
+    client.resetStore()
+    setPage('authors')
+  }
+
+
+  /*
+        <div>
+          {errorMessage}
+          <h2>Login</h2>
+          <LoginForm
+            login={login}
+            setToken={(token) => setToken(token)}
+            handleError={handleError}
+          />
+        </div>
+      )
+  */
 
   return (
     <div>
+
       <div>
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
-        <button onClick={() => setPage('add')}>add book</button>
+        {token && <button onClick={() => setPage('add')}>add book</button>}
+        {!token && <button onClick={() => setPage('login')}>login</button>}
+        {token && <button onClick={logout}>logout</button>}
       </div>
 
       <div>{errorMessage}</div>
@@ -104,6 +145,15 @@ const App = () => {
         addBook={addBook}
         handleError={handleError}
       />
+
+      <LoginForm
+        show={page === 'login'}
+        login={login}
+        setToken={(token) => setToken(token)}
+        handleError={handleError}
+        setPage={setPage}
+      />
+
 
     </div>
   )
