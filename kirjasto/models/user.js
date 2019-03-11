@@ -1,16 +1,17 @@
 const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema({
-  name: {
+  username: {
     type: String,
     required: true,
     unique: true,
-    minlength: 2
+    minlength: 3
   },
-  born: {
-    type: Number,
-    max: 2019
-  },
+  favoriteGenre: [
+    {
+      type: String,
+    }
+  ],
 })
 
-module.exports = mongoose.model('Author', schema)
+module.exports = mongoose.model('User', schema)
