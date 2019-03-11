@@ -6,6 +6,8 @@ const Book = require('./models/book')
 const Author = require('./models/author')
 const User = require('./models/user')
 const uuid = require('uuid/v1')
+const { PubSub } = require('apollo-server')
+const pubsub = new PubSub()
 
 
 const JWT_SECRET = 'NEED_HERE_A_SECRET_KEY'
@@ -51,22 +53,26 @@ const typeDefs = gql`
     me: User
   }
   type Mutation {
-  addBook(
-    title: String!
-    author: String!
-    published: Int!
-    genres: [String]!
-  ):Book
-  editAuthor(name: String!, setBornTo: Int!): Author
-  createUser(
-    username: String!
-    favoriteGenre: String!
-  ): User
-  login(
-    username: String!
-    password: String!
-  ):Token
-}
+    addBook(
+      title: String!
+      author: String!
+      published: Int!
+      genres: [String]!
+    ):Book
+    editAuthor(name: String!, setBornTo: Int!): Author
+    createUser(
+      username: String!
+      favoriteGenre: String!
+    ): User
+    login(
+      username: String!
+      password: String!
+    ):Token
+  }
+  type Subscription {
+    bookAdded: Book!
+  }    
+
 `
 
 const resolvers = {
@@ -127,6 +133,7 @@ const resolvers = {
         })
       }
       console.log('book saved')
+      pubsub.publish('BOOK_ADDED', { bookAdded: book })
       return book
     },
     editAuthor: async (root, args, { currentUser }) => {
@@ -174,6 +181,11 @@ const resolvers = {
       }
       return { value: jwt.sign(userForToken, JWT_SECRET) }
     }
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
+    },
   }
 }
 
@@ -193,6 +205,7 @@ const server = new ApolloServer({
 })
 
 
-server.listen().then(({ url }) => {
+server.listen().then(({ url, subscriptionsUrl }) => {
   console.log(`Server ready at ${url}`)
+  console.log(`Subscriptions ready at ${subscriptionsUrl}`)
 })
