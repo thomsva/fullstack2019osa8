@@ -100,7 +100,7 @@ const App = () => {
     onSubscriptionData: () => {
       window.alert('book just added:' + newBooksSubscription.data.bookAdded.title)
     }
-  });
+  })
 
   useEffect(() => {
     setToken(localStorage.getItem('library-user-token', token))
