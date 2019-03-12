@@ -98,6 +98,9 @@ const App = () => {
 
   const newBooksSubscription = useSubscription(BOOK_ADDED, {
     onSubscriptionData: () => {
+      resultAuthors.refetch()
+      resultBooks.refetch()
+      booksByGenre.refetch()
       window.alert('book just added:' + newBooksSubscription.data.bookAdded.title)
     }
   })
