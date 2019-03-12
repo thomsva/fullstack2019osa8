@@ -99,9 +99,6 @@ const resolvers = {
       return context.currentUser
     }
   },
-  Author: {
-    bookCount: (root) => Book.find({ author: root }).countDocuments()
-  },
   Mutation: {
     addBook: async (root, args, { currentUser }) => {
       if (!currentUser) {
@@ -133,6 +130,17 @@ const resolvers = {
         })
       }
       console.log('book saved')
+      const books = await Book.find({}).populate('author')
+      console.log('allBooks', args)
+      author.bookCount = books.filter((b) => b.author.name === author.name).length
+      console.log('updated author', author)
+      try {
+        await author.save()
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args,
+        })
+      }
       pubsub.publish('BOOK_ADDED', { bookAdded: book })
       return book
     },

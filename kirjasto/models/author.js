@@ -11,6 +11,9 @@ const schema = new mongoose.Schema({
     type: Number,
     max: 2019
   },
+  bookCount: {
+    type: Number
+  }
 })
 
 module.exports = mongoose.model('Author', schema)
