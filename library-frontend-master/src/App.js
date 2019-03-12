@@ -96,17 +96,11 @@ const App = () => {
   const booksByGenre = useQuery(FIND_BOOKS_BY_GENRE, { genre: "" })
   const client = useApolloClient()
 
-  const BookAdded = () => {
-    const { data, error, loading } = useSubscription(
-      BOOK_ADDED
-    )
-
-    if (loading) return <div>Waiting for new books...</div>
-    if (error) return <div>Error! {error.message}`</div>
-    console.log('Subscribed data', data)
-    return <div>Recently added book: {data.bookAdded.title}</div>
-  }
-
+  const newBooksSubscription = useSubscription(BOOK_ADDED, {
+    onSubscriptionData: () => {
+      window.alert('book just added:' + newBooksSubscription.data.bookAdded.title)
+    }
+  });
 
   useEffect(() => {
     setToken(localStorage.getItem('library-user-token', token))
@@ -152,16 +146,6 @@ const App = () => {
       </div>
 
       <div>{errorMessage}</div>
-      <BookAdded />
-      <Subscription
-        subscription={BOOK_ADDED}
-        onSubscriptionData={({ subscriptionData }) => {
-          console.log('subscribed', subscriptionData)
-        }}
-      >
-        {() => null}
-      </Subscription>
-
 
       <Authors
         show={page === 'authors'}
